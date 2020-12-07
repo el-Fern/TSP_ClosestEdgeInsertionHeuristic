@@ -1,0 +1,51 @@
+﻿@model Project_3.ViewModels.HomeIndexViewModel
+
+@*for each problem, make a section to display everything*@
+@for (int i = 0; i < Model.Problems.Count; i++)
+{
+    <h2>@Model.Problems[i].FileName</h2>
+    <div class="container">
+        <canvas id="canvas_@i" width="1050" height="1050"></canvas>
+    </div>
+}
+
+@*jquery cdn so I can use document ready*@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script>
+    $(document).ready(function () {
+        //foreach problem lets add everything to the canvas
+        @for(int i = 0; i < Model.Problems.Count; i++)
+        {
+            //get context
+            @:var c = document.getElementById("canvas_@i");
+            @:var ctx = c.getContext("2d");
+            foreach(var coord in Model.Problems[i].Coords)
+            {
+                //draw a circle for each coordinate. times by 10 since canvas is 1050 px and add 25 to offset the 50 (without, it goes slightly out of the canvas)
+                @:ctx.fillStyle = "red";
+                @:ctx.beginPath();
+                @:ctx.arc((@coord.Latitude * 10) + 25, (@coord.Longitude * 10) + 25, 20, 0, 2 * Math.PI);
+                @:ctx.fill();
+            }
+
+            foreach(var path in Model.Problems[i].NodePaths)
+            {
+                //draw a line for each path. times by 10 since canvas is 1050 px and add 25 to offset the 50 (without, it goes slightly out of the canvas)
+                @:ctx.fillStyle = "black";
+                @:ctx.beginPath();
+                var FromNode = Model.Problems[i].Coords.First(x=>x.Id == path.FromNode);
+                @:ctx.moveTo((@FromNode.Latitude * 10) + 25, (@FromNode.Longitude * 10) + 25);
+                var ToNode = Model.Problems[i].Coords.First(x => x.Id == path.ToNode);
+                @:ctx.lineTo((@ToNode.Latitude * 10) + 25, (@ToNode.Longitude * 10) + 25);
+                @:ctx.stroke();
+            }
+        }
+    });
+</script>
+
+<style>
+    canvas {
+        /*add a border for the canvas to make it apparent*/
+        border: 1px solid;
+    }
+</style>
